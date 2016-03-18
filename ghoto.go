@@ -31,10 +31,14 @@ func main() {
 			Value: "video",
 			Usage: "Destination video directory",
 		},
+		cli.BoolFlag {
+			Name: "recursive, r",
+			Usage: "Resursive",
+		},
 
 	}
 	app.Action = func(c *cli.Context) {
-		fmt.Printf("Hello ghoto src=%s, dst=%s, photo-dir=%s, video-dir=%s \n", c.String("src"), c.String("dst"), c.String("photo-dir"), c.String("video-dir"))
+		fmt.Printf("Hello ghoto src=%s, dst=%s, photo-dir=%s, video-dir=%s, recursive=%s \n", c.String("src"), c.String("dst"), c.String("photo-dir"), c.String("video-dir"), c.Bool("recursive"))
 	}
 	app.Run(os.Args)
 }
