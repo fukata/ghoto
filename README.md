@@ -1,6 +1,6 @@
 # ghoto 
+
 Photo manage cli command.
-----
 
 ## Status
 
