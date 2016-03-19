@@ -24,6 +24,8 @@ type Option struct {
 
 func main() {
 	app := cli.NewApp()
+	app.Version = "0.0.1"
+	app.Authors = []cli.Author{ cli.Author{"fukata", "tatsuya.fukata@gmail.com"} }
 	app.Name = "ghoto"
 	app.Usage = "Transfer photo(video)"
 	app.Flags = []cli.Flag {
