@@ -2,13 +2,24 @@ package main
 
 import (
 	"os"
+	"runtime"
 	"fmt"
 	"log"
-	"io/ioutil"
-	"regexp"
+	"strings"
 	"sync"
 	"github.com/codegangsta/cli"
 )
+
+type Option struct {
+	From string
+	To string
+	PhotoDir string
+	VideoDir string
+	Recursive bool
+	DryRun bool
+	Excludes []string
+	Concurrency int
+}
 
 func main() {
 	app := cli.NewApp()
@@ -35,6 +46,16 @@ func main() {
 			Value: "video",
 			Usage: "Destination video directory",
 		},
+		cli.StringFlag {
+			Name: "exclude, x",
+			Value: "",
+			Usage: "Exclude dir/file separate comma.",
+		},
+		cli.IntFlag {
+			Name: "concurrency, c",
+			Value: runtime.NumCPU(),
+			Usage: "Concurrency num.",
+		},
 		cli.BoolFlag {
 			Name: "recursive, r",
 			Usage: "Resursive",
@@ -45,94 +66,41 @@ func main() {
 		},
 	}
 	app.Action = func(c *cli.Context) {
-		fmt.Printf("Hello ghoto from=%s, to=%s, photo-dir=%s, video-dir=%s, recursive=%s, dry-run=%s \n", c.String("from"), c.String("to"), c.String("photo-dir"), c.String("video-dir"), c.Bool("recursive"), c.Bool("dry-run"))
-
-		re := regexp.MustCompile(`(?i)^[^\.].*\.(dng|cr2|jpg|jpeg|arw|orf)$`)
-
 		// options
-		from := c.String("from")
-		to := c.String("to")
-		photoDir := c.String("photo-dir")
-		//videoDir := c.String("video-dir")
-		recursive := c.Bool("recursive")
-		dryRun := c.Bool("dry-run")
+		option := &Option{
+			c.String("from"),
+			c.String("to"),
+			c.String("photo-dir"),
+			c.String("video-dir"),
+			c.Bool("recursive"),
+			c.Bool("dry-run"),
+			strings.Split(c.String("exclude"), ","),
+			c.Int("concurrency"),
+		}
 
 		// check path
-		isDir, err := IsDirectory(from)
+		isDir, err := IsDirectory(option.From)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if isDir != false {
-			fmt.Errorf("%s is not found.", from)
+			fmt.Errorf("%s is not found.", option.From)
 		}
 
-		isDir, err = IsDirectory(to)
+		isDir, err = IsDirectory(option.To)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if isDir != false {
-			fmt.Errorf("%s is not found.", to)
+			fmt.Errorf("%s is not found.", option.To)
 		}
 
-		fileInfos, readDirErr := ioutil.ReadDir(from + "/")
-		if readDirErr != nil {
-			log.Fatal(err)
-		}
-
+		// move
 		var wg sync.WaitGroup
-
-		//fileNames := []string{} 
-
-		for _, fi := range fileInfos {
-			wg.Add(1)
-			go func(fileInfo os.FileInfo) {
-				defer wg.Done()
-				name := (fileInfo).Name()
-				filePath := from + "/" + name
-
-				//log.Printf("file=%s", filePath)
-				isDir, err = IsDirectory(filePath)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				if isDir && recursive {
-					// recursive
-				} else {
-					if re.MatchString(name) == false {
-						return
-					}
-
-					//log.Printf("match file=%s", filePath)
-					exif, _ := GetExifData(filePath)
-					dateDirPath, dateDirPathErr := GetDateDirPath(exif["Date/TimeOriginal"])
-					if dateDirPathErr != nil {
-						log.Fatal(dateDirPathErr)
-					}
-
-					dstDir := to + "/" + photoDir + "/" + dateDirPath + "/"
-					if dryRun == false {
-						mkdirErr := os.MkdirAll(dstDir, 0755)
-						if mkdirErr != nil {
-							log.Fatal(mkdirErr)
-						}
-					}
-
-					dstPath := dstDir + name
-					log.Printf("%s -> %s", filePath, dstPath)
-
-					if dryRun == false {
-						moveErr := MoveFile(filePath, dstPath)
-						if moveErr != nil {
-							log.Fatal(moveErr)
-						}
-					}
-				}
-			}(fi)
-		}
-
+		ch := make(chan int, option.Concurrency)
+		MoveFiles(&wg, ch, option.From, option)
 		wg.Wait()
 	}
 	app.Run(os.Args)
