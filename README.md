@@ -8,7 +8,7 @@ Photo manage cli command.
 ## Install
 
 ```bash
-$ go get https://github.com/fukata/ghoto
+$ go get github.com/fukata/ghoto
 ```
 
 ## Usage
