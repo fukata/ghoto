@@ -19,8 +19,8 @@ build:
           go test ./...
 
   after-steps:
-		- slack-notifier:
-			url: $SLACK_URL
-			channel: ci 
-			username: wercker 
-			branch: master
+    - slack-notifier:
+        url: $SLACK_URL
+        channel: ci 
+        username: wercker 
+        branch: master
