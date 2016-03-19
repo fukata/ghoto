@@ -43,4 +43,9 @@ build:
         name: go test
         code: |
           go test ./...
-
+	after-steps:
+		- slack-notifier:
+			url: $SLACK_URL
+			channel: ci 
+			username: wercker 
+			branch: master
