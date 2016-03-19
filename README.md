@@ -4,6 +4,7 @@ Photo manage cli command.
 ## Requirement
 
 - exiftool 
+- mv 
 
 ## Install
 
