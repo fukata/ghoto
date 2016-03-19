@@ -1,5 +1,10 @@
 # ghoto 
 Photo manage cli command.
+----
+
+## Status
+
+[![wercker status](https://app.wercker.com/status/bc0ddbabc6480a220bc99a23d98a5400/m "wercker status")](https://app.wercker.com/project/bykey/bc0ddbabc6480a220bc99a23d98a5400)
 
 ## Requirement
 
