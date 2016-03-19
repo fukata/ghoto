@@ -20,7 +20,7 @@ $ go get github.com/fukata/ghoto
 ## Usage
 
 ```bash
-$ ghoto -from /path/to/src -to /path/to/dst -photo-dir photo_raw -video-dir video_raw
+$ ghoto --from /path/to/src --to /path/to/dst --photo-dir photo_raw --video-dir video_raw --recursive --exclude lightroom
 2016/03/19 13:10:11 /path/to/src/P3060621.ORF -> /path/to/dst/photo_raw/2016/03/06/P3060621.ORF
 2016/03/19 13:10:11 /path/to/src/P3060622.ORF -> /path/to/dst/photo_raw/2016/03/06/P3060622.ORF
 2016/03/19 13:10:11 /path/to/src/P3060623.ORF -> /path/to/dst/photo_raw/2016/03/06/P3060623.ORF
@@ -32,7 +32,7 @@ $ ghoto -from /path/to/src -to /path/to/dst -photo-dir photo_raw -video-dir vide
 ## Help
 
 ```bash
-$ ghoto -h
+$ ghoto --help
 NAME:
    ghoto - Transfer photo(video)
 
