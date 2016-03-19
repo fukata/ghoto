@@ -13,12 +13,13 @@ import (
 )
 
 var (
-	re = regexp.MustCompile(`(?i)^[^\.].*\.(dng|cr2|jpg|jpeg|arw|orf)$`)
+	photoRe = regexp.MustCompile(`(?i)^[^\.].*\.(dng|cr2|jpg|jpeg|arw|orf)$`)
+	videoRe = regexp.MustCompile(`(?i)^[^\.].*\.(mov|mp4|wmv)$`)
 )
 func IsDirectory(name string) (isDir bool, err error) {
 	info, err := os.Stat(name)
 	if err != nil {
-			return false, err
+		return false, err
 	}
 	return info.IsDir(), nil
 }
@@ -46,12 +47,18 @@ func GetExifData(file string) (map[string]string, error) {
 	return tags, nil
 }
 
-func GetDateDirPath(date string) (string, error) {
-	t, err := time.Parse("2006:01:02 15:04:05", date)
-	if err != nil {
-		return "", err
+func GetDateDirPath(exif map[string]string) (string, error) {
+	t, err := time.Parse("2006:01:02 15:04:05", exif["Date/TimeOriginal"])
+	if err == nil {
+		return t.Format("2006/01/02"), nil
 	}
-	return t.Format("2006/01/02"), nil
+
+	t, err = time.Parse("2006:01:02 15:04:05", exif["CreateDate"])
+	if err == nil {
+		return t.Format("2006/01/02"), nil
+	}
+
+	return "", err
 }
 
 func MoveFile(src, dst string) (error) {
@@ -100,7 +107,7 @@ func GetFileNum(from string, option *Option) (int, error) {
 				num += subNum
 			}
 		} else {
-			if re.MatchString(name) {
+			if photoRe.MatchString(name) || videoRe.MatchString(name) {
 				num += 1
 			}
 		}
@@ -109,7 +116,36 @@ func GetFileNum(from string, option *Option) (int, error) {
 	return num, nil
 }
 
-func MoveFiles(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
+func TransferFile(name, filePath, dir string, option *Option) {
+	exif, _ := GetExifData(filePath)
+	if option.Verbose {
+		log.Println(exif)
+	}
+	dateDirPath, dateDirPathErr := GetDateDirPath(exif)
+	if dateDirPathErr != nil {
+		log.Fatal(dateDirPathErr)
+	}
+
+	dstDir := option.To + "/" + dir + "/" + dateDirPath + "/"
+	if option.DryRun == false {
+		mkdirErr := os.MkdirAll(dstDir, 0755)
+		if mkdirErr != nil {
+			log.Fatal(mkdirErr)
+		}
+	}
+
+	dstPath := dstDir + name
+	log.Printf("%s -> %s", filePath, dstPath)
+
+	if option.DryRun == false {
+		moveErr := MoveFile(filePath, dstPath)
+		if moveErr != nil {
+			log.Fatal(moveErr)
+		}
+	}
+}
+
+func Transfer(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
 	fileInfos, readErr := ioutil.ReadDir(from + "/")
 	if readErr != nil {
 		log.Fatal(readErr)
@@ -135,37 +171,13 @@ func MoveFiles(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
 
 			if isDir {
 				if option.Recursive {
-					go MoveFiles(wg, ch, filePath, option)
+					Transfer(wg, ch, filePath, option)
 				}
 			} else {
-				if re.MatchString(name) == false {
-					<-ch
-					return
-				}
-
-				exif, _ := GetExifData(filePath)
-				dateDirPath, dateDirPathErr := GetDateDirPath(exif["Date/TimeOriginal"])
-				//TODO don't have exif
-				if dateDirPathErr != nil {
-					log.Fatal(dateDirPathErr)
-				}
-
-				dstDir := option.To + "/" + option.PhotoDir + "/" + dateDirPath + "/"
-				if option.DryRun == false {
-					mkdirErr := os.MkdirAll(dstDir, 0755)
-					if mkdirErr != nil {
-						log.Fatal(mkdirErr)
-					}
-				}
-
-				dstPath := dstDir + name
-				log.Printf("%s -> %s", filePath, dstPath)
-
-				if option.DryRun == false {
-					moveErr := MoveFile(filePath, dstPath)
-					if moveErr != nil {
-						log.Fatal(moveErr)
-					}
+				if photoRe.MatchString(name) {
+					TransferFile(name, filePath, option.PhotoDir, option)
+				} else if videoRe.MatchString(name) {
+					TransferFile(name, filePath, option.VideoDir, option)
 				}
 			}
 

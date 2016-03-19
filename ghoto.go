@@ -19,6 +19,7 @@ type Option struct {
 	DryRun bool
 	Excludes []string
 	Concurrency int
+	Verbose bool
 }
 
 func main() {
@@ -64,6 +65,10 @@ func main() {
 			Name: "dry-run",
 			Usage: "Dry Run",
 		},
+		cli.BoolFlag {
+			Name: "verbose, vvv",
+			Usage: "Verbose",
+		},
 	}
 	app.Action = func(c *cli.Context) {
 		// options
@@ -76,6 +81,7 @@ func main() {
 			c.Bool("dry-run"),
 			strings.Split(c.String("exclude"), ","),
 			c.Int("concurrency"),
+			c.Bool("verbose"),
 		}
 
 		// check path
@@ -100,7 +106,7 @@ func main() {
 		// move
 		var wg sync.WaitGroup
 		ch := make(chan int, option.Concurrency)
-		MoveFiles(&wg, ch, option.From, option)
+		Transfer(&wg, ch, option.From, option)
 		wg.Wait()
 	}
 	app.Run(os.Args)
