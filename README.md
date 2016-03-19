@@ -1,6 +1,6 @@
 # ghoto 
 
-Photo manage cli command.
+Photo data transfer tool.
 
 ## Status
 
