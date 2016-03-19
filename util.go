@@ -72,11 +72,20 @@ func MoveFile(src, dst string) (error) {
 	}
 
 	return nil
-	//return os.Rename(src, dst)
 }
 
 func IsIgnoreFile(name string, option *Option) (bool) {
-	return name == "." || name == ".." || name == "lightroom"
+	if name == "." || name == ".." {
+		return true
+	}
+
+	for _, v := range option.Excludes {
+		if name == v {
+			return true
+		}
+	}
+
+	return false
 }
 
 func GetFileNum(from string, option *Option) (int, error) {
