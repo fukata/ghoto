@@ -110,6 +110,7 @@ func main() {
 		ch := make(chan int, option.Concurrency)
 		Transfer(&wg, ch, option.From, option)
 		wg.Wait()
+		log.Println("done")
 	}
 	app.Run(os.Args)
 }
