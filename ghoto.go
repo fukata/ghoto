@@ -19,12 +19,13 @@ type Option struct {
 	DryRun bool
 	Excludes []string
 	Concurrency int
+	Force bool
 	Verbose bool
 }
 
 func main() {
 	app := cli.NewApp()
-	app.Version = "0.0.1"
+	app.Version = "0.0.2"
 	app.Authors = []cli.Author{ cli.Author{"fukata", "tatsuya.fukata@gmail.com"} }
 	app.Name = "ghoto"
 	app.Usage = "Transfer photo(video)"
@@ -64,6 +65,10 @@ func main() {
 			Usage: "Resursive",
 		},
 		cli.BoolFlag {
+			Name: "force",
+			Usage: "Force",
+		},
+		cli.BoolFlag {
 			Name: "dry-run",
 			Usage: "Dry Run",
 		},
@@ -83,6 +88,7 @@ func main() {
 			c.Bool("dry-run"),
 			strings.Split(c.String("exclude"), ","),
 			c.Int("concurrency"),
+			c.Bool("force"),
 			c.Bool("verbose"),
 		}
 

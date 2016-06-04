@@ -61,7 +61,13 @@ func GetDateDirPath(exif map[string]string) (string, error) {
 	return "", err
 }
 
-func MoveFile(src, dst string) (error) {
+func MoveFile(src, dst string, option *Option) (error) {
+	if !option.Force {
+		_, err := os.Stat(dst)
+		if err != nil {
+			return err
+		}
+	}
 	cmd := exec.Command("mv", src, dst)
 
 	var out bytes.Buffer
@@ -147,7 +153,7 @@ func TransferFile(name, filePath, dir string, option *Option) {
 	log.Printf("%s -> %s", filePath, dstPath)
 
 	if option.DryRun == false {
-		moveErr := MoveFile(filePath, dstPath)
+		moveErr := MoveFile(filePath, dstPath, option)
 		if moveErr != nil {
 			log.Fatal(moveErr)
 		}
