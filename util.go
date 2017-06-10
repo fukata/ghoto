@@ -14,7 +14,7 @@ import (
 
 var (
 	photoRe = regexp.MustCompile(`(?i)^[^\.].*\.(dng|cr2|jpg|jpeg|arw|orf)$`)
-	videoRe = regexp.MustCompile(`(?i)^[^\.].*\.(mov|mp4|wmv)$`)
+	videoRe = regexp.MustCompile(`(?i)^[^\.].*\.(mov|mp4|wmv|avi)$`)
 )
 func IsDirectory(name string) (isDir bool, err error) {
 	info, err := os.Stat(name)

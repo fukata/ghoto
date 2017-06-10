@@ -1,4 +1,4 @@
-# ghoto 
+# ghoto
 
 Photo data transfer tool.
 
@@ -8,8 +8,8 @@ Photo data transfer tool.
 
 ## Requirement
 
-- exiftool 
-- mv 
+- exiftool
+- mv
 
 ## Install
 
@@ -40,7 +40,7 @@ USAGE:
    ghoto [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.1
+   0.0.3
 
 AUTHOR(S):
    fukata <tatsuya.fukata@gmail.com>
