@@ -21,6 +21,6 @@ build:
   after-steps:
     - slack-notifier:
         url: $SLACK_URL
-        channel: ci 
-        username: wercker 
+        channel: ci
+        username: wercker
         branch: master
