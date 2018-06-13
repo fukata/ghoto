@@ -61,3 +61,10 @@ GLOBAL OPTIONS:
    --help, -h                   show help
    --version, -v                print the version
 ```
+
+## Build
+
+```bash
+$ gom install
+$ gom build
+```
