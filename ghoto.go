@@ -20,6 +20,7 @@ type Option struct {
 	Excludes []string
 	Concurrency int
 	Force bool
+	SkipInvalidData bool
 	Verbose bool
 }
 
@@ -69,6 +70,10 @@ func main() {
 			Usage: "Force",
 		},
 		cli.BoolFlag {
+			Name: "skip-invalid-data",
+			Usage: "SkipInvalidData",
+		},
+		cli.BoolFlag {
 			Name: "dry-run",
 			Usage: "Dry Run",
 		},
@@ -89,6 +94,7 @@ func main() {
 			strings.Split(c.String("exclude"), ","),
 			c.Int("concurrency"),
 			c.Bool("force"),
+			c.Bool("skip-invalid-data"),
 			c.Bool("verbose"),
 		}
 

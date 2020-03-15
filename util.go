@@ -138,7 +138,12 @@ func TransferFile(name, filePath, dir string, option *Option) {
 	}
 	dateDirPath, dateDirPathErr := GetDateDirPath(exif)
 	if dateDirPathErr != nil {
-		log.Fatal(dateDirPathErr)
+		if option.SkipInvalidData {
+			log.Printf("skip %s. Can't get date dir path.", filePath)
+			return
+		} else {
+			log.Fatal(dateDirPathErr)
+		}
 	}
 
 	dstDir := option.To + "/" + dir + "/" + dateDirPath + "/"
