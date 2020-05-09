@@ -68,12 +68,9 @@ func MoveFile(src, dst string, option *Option) (error) {
 			return err
 		}
 	}
-	cmd := exec.Command("mv", src, dst)
 
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	if err := cmd.Run(); err != nil {
+	err := os.Rename(src, dst)
+	if err != nil {
 		return err
 	}
 

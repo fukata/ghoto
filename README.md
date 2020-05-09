@@ -9,7 +9,6 @@ Photo data transfer tool.
 ## Requirement
 
 - exiftool
-- mv
 
 ## Install
 
