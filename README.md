@@ -32,6 +32,7 @@ $ ghoto --from /path/to/src --to /path/to/dst --photo-dir photo_raw --video-dir 
 
 ```bash
 $ ghoto --help
+
 NAME:
    ghoto - Transfer photo(video)
 
@@ -39,26 +40,28 @@ USAGE:
    ghoto [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.3
+   0.0.5
 
-AUTHOR(S):
+AUTHOR:
    fukata <tatsuya.fukata@gmail.com>
 
 COMMANDS:
-   help, h      Shows a list of commands or help for one command
+   help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --from "/path/to/src"        Source directory
-   --to "/path/to/dst"          Destination directory
-   --photo-dir, -P "photo"      Destination photo directory
-   --video-dir, -V "video"      Destination video directory
-   --exclude, -x                Exclude dir/file separate comma.
-   --concurrency, -c "8"        Concurrency num.
-   --recursive, -r              Resursive
-   --dry-run                    Dry Run
-   --verbose, --vvv             Verbose
-   --help, -h                   show help
-   --version, -v                print the version
+   --from value                   Source directory (default: "/path/to/src")
+   --to value                     Destination directory (default: "/path/to/dst")
+   --photo-dir value, -P value    Destination photo directory (default: "photo")
+   --video-dir value, -V value    Destination video directory (default: "video")
+   --exclude value, -x value      Exclude dir/file separate comma.
+   --concurrency value, -c value  Concurrency num. (default: 8)
+   --recursive, -r                Resursive (default: false)
+   --force                        Force (default: false)
+   --skip-invalid-data            SkipInvalidData (default: false)
+   --dry-run                      Dry Run (default: false)
+   --verbose                      Verbose (default: false)
+   --help, -h                     show help (default: false)
+   --version, -v                  print the version (default: false)
 ```
 
 ## Build

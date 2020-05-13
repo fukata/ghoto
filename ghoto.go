@@ -27,8 +27,9 @@ type Option struct {
 
 func main() {
 	app := &cli.App{
+		UseShortOptionHandling: true,
 		Name: "ghoto",
-		Version: "0.0.4",
+		Version: "0.0.5",
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{
@@ -40,11 +41,11 @@ func main() {
 		Flags: []cli.Flag {
 			&cli.StringFlag { Name: "from", Value: "/path/to/src", Usage: "Source directory" },
 			&cli.StringFlag { Name: "to", Value: "/path/to/dst", Usage: "Destination directory" },
-			&cli.StringFlag { Name: "photo-dir, P", Value: "photo", Usage: "Destination photo directory" },
-			&cli.StringFlag { Name: "video-dir, V", Value: "video", Usage: "Destination video directory" },
-			&cli.StringFlag { Name: "exclude, x", Value: "", Usage: "Exclude dir/file separate comma." },
-			&cli.IntFlag 		{ Name: "concurrency, c", Value: runtime.NumCPU(), Usage: "Concurrency num." },
-			&cli.BoolFlag 	{ Name: "recursive, r", Usage: "Resursive" },
+			&cli.StringFlag { Name: "photo-dir", Aliases: []string{"P"}, Value: "photo", Usage: "Destination photo directory" },
+			&cli.StringFlag { Name: "video-dir", Aliases: []string{"V"}, Value: "video", Usage: "Destination video directory" },
+			&cli.StringFlag { Name: "exclude", Aliases: []string{"x"}, Value: "", Usage: "Exclude dir/file separate comma." },
+			&cli.IntFlag 		{ Name: "concurrency", Aliases: []string{"c"}, Value: runtime.NumCPU(), Usage: "Concurrency num." },
+			&cli.BoolFlag 	{ Name: "recursive", Aliases: []string{"r"}, Usage: "Resursive" },
 			&cli.BoolFlag 	{ Name: "force", Usage: "Force" },
 			&cli.BoolFlag 	{ Name: "skip-invalid-data", Usage: "SkipInvalidData" },
 			&cli.BoolFlag 	{ Name: "dry-run", Usage: "Dry Run" },
