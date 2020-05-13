@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"bytes"
@@ -69,11 +71,26 @@ func MoveFile(src, dst string, option *Option) (error) {
 		}
 	}
 
-	err := os.Rename(src, dst)
+	inputFile, err := os.Open(src)
 	if err != nil {
-		return err
+			return fmt.Errorf("Couldn't open source file: %s", err)
 	}
-
+	outputFile, err := os.Create(dst)
+	if err != nil {
+			inputFile.Close()
+			return fmt.Errorf("Couldn't open dest file: %s", err)
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, inputFile)
+	inputFile.Close()
+	if err != nil {
+			return fmt.Errorf("Writing to output file failed: %s", err)
+	}
+	// The copy was successful, so now delete the original file
+	err = os.Remove(src)
+	if err != nil {
+			return fmt.Errorf("Failed removing original file: %s", err)
+	}
 	return nil
 }
 
