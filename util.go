@@ -1,23 +1,24 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
-	"bytes"
-	"strings"
-	"time"
-	"io/ioutil"
 	"regexp"
-	"log"
+	"strings"
 	"sync"
+	"time"
 )
 
 var (
 	photoRe = regexp.MustCompile(`(?i)^[^\.].*\.(dng|cr2|jpg|jpeg|arw|orf)$`)
 	videoRe = regexp.MustCompile(`(?i)^[^\.].*\.(mov|mp4|wmv|avi)$`)
 )
+
 func IsDirectory(name string) (isDir bool, err error) {
 	info, err := os.Stat(name)
 	if err != nil {
@@ -63,7 +64,7 @@ func GetDateDirPath(exif map[string]string) (string, error) {
 	return "", err
 }
 
-func MoveFile(src, dst string, option *Option) (error) {
+func MoveFile(src, dst string, option *Option) error {
 	if !option.Force {
 		_, err := os.Stat(dst)
 		if err != nil {
@@ -73,28 +74,28 @@ func MoveFile(src, dst string, option *Option) (error) {
 
 	inputFile, err := os.Open(src)
 	if err != nil {
-			return fmt.Errorf("Couldn't open source file: %s", err)
+		return fmt.Errorf("Couldn't open source file: %s", err)
 	}
 	outputFile, err := os.Create(dst)
 	if err != nil {
-			inputFile.Close()
-			return fmt.Errorf("Couldn't open dest file: %s", err)
+		inputFile.Close()
+		return fmt.Errorf("Couldn't open dest file: %s", err)
 	}
 	defer outputFile.Close()
 	_, err = io.Copy(outputFile, inputFile)
 	inputFile.Close()
 	if err != nil {
-			return fmt.Errorf("Writing to output file failed: %s", err)
+		return fmt.Errorf("Writing to output file failed: %s", err)
 	}
 	// The copy was successful, so now delete the original file
 	err = os.Remove(src)
 	if err != nil {
-			return fmt.Errorf("Failed removing original file: %s", err)
+		return fmt.Errorf("Failed removing original file: %s", err)
 	}
 	return nil
 }
 
-func IsIgnoreFile(name string, option *Option) (bool) {
+func IsIgnoreFile(name string, option *Option) bool {
 	if name == "." || name == ".." {
 		return true
 	}
@@ -129,7 +130,7 @@ func GetFileNum(from string, option *Option) (int, error) {
 
 		if isDir {
 			if option.Recursive {
-				subNum, subErr := GetFileNum(from + "/" + name, option)
+				subNum, subErr := GetFileNum(from+"/"+name, option)
 				if subErr != nil {
 					return 0, subErr
 				}
