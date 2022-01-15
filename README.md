@@ -67,6 +67,6 @@ GLOBAL OPTIONS:
 ## Build
 
 ```bash
-$ gom install
-$ gom build
+$ go install
+$ go build
 ```
