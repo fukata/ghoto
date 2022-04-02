@@ -2,13 +2,16 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -27,8 +30,21 @@ func IsDirectory(name string) (isDir bool, err error) {
 	return info.IsDir(), nil
 }
 
+func IsFile(name string) (isFile bool, err error) {
+	info, err := os.Stat(name)
+	if err != nil {
+		return false, err
+	}
+	return !info.IsDir(), nil
+}
+
 func GetExifData(file string) (map[string]string, error) {
-	cmd := exec.Command("exiftool", file)
+	cmdPath := "exiftool" // for linux or mac
+	if runtime.GOOS == "windows" {
+		cmdPath = "exiftool.exe"
+	}
+
+	cmd := exec.Command(cmdPath, file)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -65,10 +81,12 @@ func GetDateDirPath(exif map[string]string) (string, error) {
 }
 
 func MoveFile(src, dst string, option *Option) error {
+	log.Printf("MoveFile. src=%s, dst=%s", src, dst)
 	if !option.Force {
-		_, err := os.Stat(dst)
-		if err != nil {
-			return err
+		// 既にファイルが存在するなら書き込まない
+		isFile, err := IsFile(dst)
+		if isFile || err != nil {
+			return errors.New(fmt.Sprintf("dst=%s is already exists. if you want to overwrite please use --force option", dst))
 		}
 	}
 
@@ -109,47 +127,14 @@ func IsIgnoreFile(name string, option *Option) bool {
 	return false
 }
 
-func GetFileNum(from string, option *Option) (int, error) {
-	fileInfos, readErr := ioutil.ReadDir(from + "/")
-	if readErr != nil {
-		return 0, readErr
-	}
-
-	num := 0
-	for _, fileInfo := range fileInfos {
-		name := (fileInfo).Name()
-		if IsIgnoreFile(name, option) {
-			continue
-		}
-
-		filePath := from + "/" + name
-		isDir, err := IsDirectory(filePath)
-		if err != nil {
-			return 0, err
-		}
-
-		if isDir {
-			if option.Recursive {
-				subNum, subErr := GetFileNum(from+"/"+name, option)
-				if subErr != nil {
-					return 0, subErr
-				}
-				num += subNum
-			}
-		} else {
-			if photoRe.MatchString(name) || videoRe.MatchString(name) {
-				num += 1
-			}
-		}
-	}
-
-	return num, nil
-}
-
 func TransferFile(name, filePath, dir string, option *Option) {
+	if option.Verbose {
+		log.Printf("TransferFile. name=%s, filePath=%s, dir=%s", name, filePath, dir)
+	}
+
 	exif, _ := GetExifData(filePath)
 	if option.Verbose {
-		log.Println(exif)
+		log.Printf("exif=%v", exif)
 	}
 	dateDirPath, dateDirPathErr := GetDateDirPath(exif)
 	if dateDirPathErr != nil {
@@ -161,7 +146,7 @@ func TransferFile(name, filePath, dir string, option *Option) {
 		}
 	}
 
-	dstDir := option.To + "/" + dir + "/" + dateDirPath + "/"
+	dstDir := filepath.Join(option.To, dir, dateDirPath)
 	if option.DryRun == false {
 		mkdirErr := os.MkdirAll(dstDir, 0755)
 		if mkdirErr != nil {
@@ -169,7 +154,7 @@ func TransferFile(name, filePath, dir string, option *Option) {
 		}
 	}
 
-	dstPath := dstDir + name
+	dstPath := filepath.Join(dstDir, name)
 	log.Printf("%s -> %s", filePath, dstPath)
 
 	if option.DryRun == false {
@@ -181,7 +166,11 @@ func TransferFile(name, filePath, dir string, option *Option) {
 }
 
 func Transfer(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
-	fileInfos, readErr := ioutil.ReadDir(from + "/")
+	if option.Verbose {
+		log.Printf("Transfer. from=%s", from)
+	}
+
+	fileInfos, readErr := ioutil.ReadDir(from)
 	if readErr != nil {
 		log.Fatal(readErr)
 	}
@@ -193,12 +182,18 @@ func Transfer(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
 			ch <- 1
 
 			name := (fileInfo).Name()
+			if option.Verbose {
+				log.Printf("dir=%s, file=%s", from, name)
+			}
 			if IsIgnoreFile(name, option) {
+				if option.Verbose {
+					log.Printf("ignored. dir=%s, file=%s", from, name)
+				}
 				<-ch
 				return
 			}
 
-			filePath := from + "/" + name
+			filePath := filepath.Join(from, name)
 			isDir, err := IsDirectory(filePath)
 			if err != nil {
 				log.Fatal(err)
