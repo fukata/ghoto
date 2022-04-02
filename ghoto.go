@@ -29,7 +29,7 @@ func main() {
 	app := &cli.App{
 		UseShortOptionHandling: true,
 		Name:                   "ghoto",
-		Version:                "0.0.6",
+		Version:                "0.1.0",
 		Compiled:               time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{
