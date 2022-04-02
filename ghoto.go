@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"runtime"
@@ -29,7 +28,7 @@ func main() {
 	app := &cli.App{
 		UseShortOptionHandling: true,
 		Name:                   "ghoto",
-		Version:                "0.0.5",
+		Version:                "0.0.6",
 		Compiled:               time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{
