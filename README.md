@@ -4,9 +4,7 @@ Photo data transfer tool.
 
 ## Status
 
-![build](https://github.com/github/fukata/ghoto/workflows/build.yml/badge.svg)
-
-![build](https://github.com/github/fukata/ghoto/workflows/release.yml/badge.svg)
+[![.github/workflows/build.yml](https://github.com/fukata/ghoto/actions/workflows/build.yml/badge.svg)](https://github.com/fukata/ghoto/actions/workflows/build.yml)
 
 ## Requirement
 
