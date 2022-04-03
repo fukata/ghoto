@@ -22,7 +22,7 @@ var (
 	videoRe = regexp.MustCompile(`(?i)^[^\.].*\.(mov|mp4|wmv|avi)$`)
 )
 
-func isDirectory(name string) (isDir bool, err error) {
+func IsDirectory(name string) (isDir bool, err error) {
 	info, err := os.Stat(name)
 	if err != nil {
 		return false, err
@@ -194,7 +194,7 @@ func Transfer(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
 			}
 
 			filePath := filepath.Join(from, name)
-			isDir, err := isDirectory(filePath)
+			isDir, err := IsDirectory(filePath)
 			if err != nil {
 				log.Fatal(err)
 			}
