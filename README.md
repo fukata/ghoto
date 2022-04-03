@@ -4,7 +4,9 @@ Photo data transfer tool.
 
 ## Status
 
-[![wercker status](https://app.wercker.com/status/bc0ddbabc6480a220bc99a23d98a5400/s "wercker status")](https://app.wercker.com/project/bykey/bc0ddbabc6480a220bc99a23d98a5400)
+![build](https://github.com/github/fukata/ghoto/workflows/build.yml/badge.svg)
+
+![build](https://github.com/github/fukata/ghoto/workflows/release.yml/badge.svg)
 
 ## Requirement
 
