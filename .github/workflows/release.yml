@@ -11,10 +11,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.0'
-      - uses: release-drafter/release-drafter@v5
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: go install
       - name: Build Linux Binary
         run: env GOOS=linux GOARCH=amd64 go build -o ghoto-linux-amd64
@@ -22,12 +18,17 @@ jobs:
         run: env GOOS=darwin GOARCH=amd64 go build -o ghoto-darwin-amd64
       - name: Build Windows Binary
         run: env GOOS=windows GOARCH=amd64 go build -o ghoto-windows-amd64.exe
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload assets ghoto-linux-amd64
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ghoto-linux-amd64
           asset_name: ghoto-linux-amd64
           asset_content_type: application/octet-stream
@@ -36,7 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ghoto-darwin-amd64
           asset_name: ghoto-darwin-amd64
           asset_content_type: application/octet-stream
@@ -45,7 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ghoto-windows-amd64.exe
           asset_name: ghoto-windows-amd64.exe
           asset_content_type: application/octet-stream
