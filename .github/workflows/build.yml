@@ -15,4 +15,24 @@ jobs:
           go-version: '1.18.0'
       - run: go install
       - run: go test
-      - run: go build
+      - name: Build linux-amd64 binary
+        run: env GOOS=linux GOARCH=amd64 go build -o ghoto-linux-amd64
+      - name: Build darwin-amd64 binary
+        run: env GOOS=darwin GOARCH=amd64 go build -o ghoto-darwin-amd64
+      - name: Build windows-amd64 binary
+        run: env GOOS=windows GOARCH=amd64 go build -o ghoto-windows-amd64.exe
+      - name: Upload ghoto-linux-amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: ghoto-linux-amd64
+          path: ghoto-linux-amd64
+      - name: Upload ghoto-darwin-amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: ghoto-darwin-amd64
+          path: ghoto-darwin-amd64
+      - name: Upload ghoto-windows-amd64.exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: ghoto-windows-amd64.exe
+          path: ghoto-windows-amd64.exe
