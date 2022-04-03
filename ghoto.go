@@ -25,11 +25,13 @@ type Option struct {
 	Verbose         bool
 }
 
+const VERSION = "0.1.1"
+
 func main() {
 	app := &cli.App{
 		UseShortOptionHandling: true,
 		Name:                   "ghoto",
-		Version:                "0.1.0",
+		Version:                VERSION,
 		Compiled:               time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{
