@@ -68,7 +68,7 @@ func main() {
 			}
 
 			// check path
-			isDir, err := IsDirectory(option.From)
+			isDir, err := isDirectory(option.From)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -77,7 +77,7 @@ func main() {
 				fmt.Errorf("%s is not found.", option.From)
 			}
 
-			isDir, err = IsDirectory(option.To)
+			isDir, err = isDirectory(option.To)
 			if err != nil {
 				log.Fatal(err)
 			}

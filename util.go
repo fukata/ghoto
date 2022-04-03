@@ -22,7 +22,7 @@ var (
 	videoRe = regexp.MustCompile(`(?i)^[^\.].*\.(mov|mp4|wmv|avi)$`)
 )
 
-func IsDirectory(name string) (isDir bool, err error) {
+func isDirectory(name string) (isDir bool, err error) {
 	info, err := os.Stat(name)
 	if err != nil {
 		return false, err
@@ -30,7 +30,7 @@ func IsDirectory(name string) (isDir bool, err error) {
 	return info.IsDir(), nil
 }
 
-func IsFile(name string) (isFile bool, err error) {
+func isFile(name string) (isFile bool, err error) {
 	info, err := os.Stat(name)
 	if err != nil {
 		return false, err
@@ -38,7 +38,7 @@ func IsFile(name string) (isFile bool, err error) {
 	return !info.IsDir(), nil
 }
 
-func GetExifData(file string) (map[string]string, error) {
+func readExifData(file string) (map[string]string, error) {
 	cmdPath := "exiftool" // for linux or mac
 	if runtime.GOOS == "windows" {
 		cmdPath = "exiftool.exe"
@@ -66,7 +66,7 @@ func GetExifData(file string) (map[string]string, error) {
 	return tags, nil
 }
 
-func GetDateDirPath(exif map[string]string) (string, error) {
+func pathFromExif(exif map[string]string) (string, error) {
 	t, err := time.Parse("2006:01:02 15:04:05", exif["Date/TimeOriginal"])
 	if err == nil {
 		return t.Format("2006/01/02"), nil
@@ -80,11 +80,11 @@ func GetDateDirPath(exif map[string]string) (string, error) {
 	return "", err
 }
 
-func MoveFile(src, dst string, option *Option) error {
-	log.Printf("MoveFile. src=%s, dst=%s", src, dst)
+func moveFile(src, dst string, option *Option) error {
+	log.Printf("moveFile. src=%s, dst=%s", src, dst)
 	if !option.Force {
 		// 既にファイルが存在するなら書き込まない
-		isFile, err := IsFile(dst)
+		isFile, err := isFile(dst)
 		if isFile || err != nil {
 			return errors.New(fmt.Sprintf("dst=%s is already exists. if you want to overwrite please use --force option", dst))
 		}
@@ -113,7 +113,7 @@ func MoveFile(src, dst string, option *Option) error {
 	return nil
 }
 
-func IsIgnoreFile(name string, option *Option) bool {
+func isIgnoreFile(name string, option *Option) bool {
 	if name == "." || name == ".." {
 		return true
 	}
@@ -127,16 +127,16 @@ func IsIgnoreFile(name string, option *Option) bool {
 	return false
 }
 
-func TransferFile(name, filePath, dir string, option *Option) {
+func transferFile(name, filePath, dir string, option *Option) {
 	if option.Verbose {
-		log.Printf("TransferFile. name=%s, filePath=%s, dir=%s", name, filePath, dir)
+		log.Printf("transferFile. name=%s, filePath=%s, dir=%s", name, filePath, dir)
 	}
 
-	exif, _ := GetExifData(filePath)
+	exif, _ := readExifData(filePath)
 	if option.Verbose {
 		log.Printf("exif=%v", exif)
 	}
-	dateDirPath, dateDirPathErr := GetDateDirPath(exif)
+	dateDirPath, dateDirPathErr := pathFromExif(exif)
 	if dateDirPathErr != nil {
 		if option.SkipInvalidData {
 			log.Printf("skip %s. Can't get date dir path.", filePath)
@@ -158,7 +158,7 @@ func TransferFile(name, filePath, dir string, option *Option) {
 	log.Printf("%s -> %s", filePath, dstPath)
 
 	if option.DryRun == false {
-		moveErr := MoveFile(filePath, dstPath, option)
+		moveErr := moveFile(filePath, dstPath, option)
 		if moveErr != nil {
 			log.Fatal(moveErr)
 		}
@@ -185,7 +185,7 @@ func Transfer(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
 			if option.Verbose {
 				log.Printf("dir=%s, file=%s", from, name)
 			}
-			if IsIgnoreFile(name, option) {
+			if isIgnoreFile(name, option) {
 				if option.Verbose {
 					log.Printf("ignored. dir=%s, file=%s", from, name)
 				}
@@ -194,7 +194,7 @@ func Transfer(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
 			}
 
 			filePath := filepath.Join(from, name)
-			isDir, err := IsDirectory(filePath)
+			isDir, err := isDirectory(filePath)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -205,9 +205,9 @@ func Transfer(wg *sync.WaitGroup, ch chan int, from string, option *Option) {
 				}
 			} else {
 				if photoRe.MatchString(name) {
-					TransferFile(name, filePath, option.PhotoDir, option)
+					transferFile(name, filePath, option.PhotoDir, option)
 				} else if videoRe.MatchString(name) {
-					TransferFile(name, filePath, option.VideoDir, option)
+					transferFile(name, filePath, option.VideoDir, option)
 				}
 			}
 
