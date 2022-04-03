@@ -1,7 +1,7 @@
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types:
+      - published
 
 jobs:
   release:
@@ -30,6 +30,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ghoto-linux-amd64
           asset_name: ghoto-linux-amd64
+          asset_content_type: application/octet-stream
       - name: Upload assets ghoto-darwin-amd64
         uses: actions/upload-release-asset@v1
         env:
@@ -38,6 +39,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ghoto-darwin-amd64
           asset_name: ghoto-darwin-amd64
+          asset_content_type: application/octet-stream
       - name: Upload assets ghoto-windows-amd64
         uses: actions/upload-release-asset@v1
         env:
@@ -46,3 +48,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ghoto-windows-amd64.exe
           asset_name: ghoto-windows-amd64.exe
+          asset_content_type: application/octet-stream
