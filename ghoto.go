@@ -25,7 +25,7 @@ type Option struct {
 	Verbose         bool
 }
 
-const VERSION = "0.1.1"
+const VERSION = "0.1.2"
 
 func main() {
 	app := &cli.App{
